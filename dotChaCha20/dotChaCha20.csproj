@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+      <PackageId>nebulae.dotChaCha20</PackageId>
+      <Version>0.1.4</Version>
+      <Authors>Robert C. Horvath III</Authors>
+      <Company>Nebulae Foundation LLC</Company>
+      <Description>High-performance ChaCha20 wrapper for .NET with native AVX2-optimized bindings.</Description>
+      <PackageTags>chacha chacha20 hashing crypto native AOT encryption</PackageTags>
+      <RepositoryUrl>https://github.com/nebulaeonline/dotChaCha20</RepositoryUrl>
+      <RepositoryType>git</RepositoryType>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <PackageProjectUrl>https://github.com/nebulaeonline/dotChaCha20</PackageProjectUrl>
+      <IncludeSymbols>false</IncludeSymbols>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <Copyright>Copyright © 2025 Nebulae Foundation LLC </Copyright>
+      <PackageReadmeFile>docs\README.md</PackageReadmeFile>
+    <Nullable>enable</Nullable>
+    <RootNamespace>nebulae.dotChaCha20</RootNamespace>
+    <PackageId>nebulae.$(AssemblyName)</PackageId>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="docs">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        </None>
+        <None Include="runtimes\**\native\*" Pack="true" PackagePath="runtimes\" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+</Project>
