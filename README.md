@@ -2,9 +2,11 @@
 
 A minimal, fast, cross-platform ChaCha20 wrapper for .NET applications.
 
-This library provides access to the ChaCha20 stream cipher, which is known for its speed and security. It is designed to be easy to use and integrates seamlessly with .NET applications.
+This library provides access to the ChaCha20 stream cipher, which is known for its speed and security. It is designed to be easy to use and integrates seamlessly with .NET applications. Binaries are provided for Windows x64, Linux x64 and macOS (Apple Silicon).
 
 The underlying optimized implementation is taken verbatim from BoringSSL maintained by Google, ensuring that it is both efficient and secure.
+
+Tests are included and available in the Github repo.
 
 [![NuGet](https://img.shields.io/nuget/v/nebulae.dotChaCha20.svg)](https://www.nuget.org/packages/nebulae.dotChaCha20)
 
@@ -16,7 +18,7 @@ The underlying optimized implementation is taken verbatim from BoringSSL maintai
 - **High performance**: Optimized for speed, leveraging native code where possible.
 - **Easy to use**: Simple API for encryption and decryption.
 - **Secure**: Based on the ChaCha20 cipher, which is widely recognized for its security.
-- **Minimal dependencies**: No external dependencies required, making it lightweight and easy to integrate.
+- **Minimal dependencies**: No external dependencies required (all are included), making it lightweight and easy to integrate.
 
 ---
 
