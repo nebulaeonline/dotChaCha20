@@ -2,7 +2,7 @@
 
 A minimal, fast, cross-platform ChaCha20 wrapper for .NET applications.
 
-This library provides access to the ChaCha20 stream cipher, which is known for its speed and security. It is designed to be easy to use and integrates seamlessly with .NET applications. Binaries are provided for Windows x64, Linux x64 and macOS (Apple Silicon).
+This library provides access to the ChaCha20 stream cipher, which is known for its speed and security. It is designed to be easy to use and integrates seamlessly with .NET applications. Binaries are provided for Windows x64, Linux x64 and macOS (x64 & Apple Silicon).
 
 The underlying optimized implementation is taken verbatim from BoringSSL maintained by Google, ensuring that it is both efficient and secure.
 
@@ -14,8 +14,8 @@ Tests are included and available in the Github repo.
 
 ## Features
 
-- **Cross-platform**: Works on Windows, Linux, and macOS (Apple Silicon only).
-- **High performance**: Optimized for speed, leveraging native code where possible.
+- **Cross-platform**: Works on Windows, Linux, and macOS (x64 & Apple Silicon).
+- **High performance**: Optimized for speed, leveraging AVX2 on x64 & neon on Apple Silicon.
 - **Easy to use**: Simple API for encryption and decryption.
 - **Secure**: Based on the ChaCha20 cipher, which is widely recognized for its security.
 - **Minimal dependencies**: No external dependencies required (all are included), making it lightweight and easy to integrate.
@@ -25,8 +25,8 @@ Tests are included and available in the Github repo.
 ## Requirements
 
 - .NET 8.0 or later
-- AVX2 capable CPU (or Apple Silicon for macOS)
-- Windows x64, Linux x64, or macOS M-series (arm64)
+- Advanced SIMD capable CPU (AVX2 support for x64 on any OS or neon on Apple Silicon M-Series)
+- Windows x64, Linux x64, or macOS (x64 / M-series arm64)
 
 ## Usage
 

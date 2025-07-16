@@ -34,8 +34,8 @@ namespace nebulae.dotChaCha20
             {
                 if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
                     return Path.Combine("runtimes", "osx-arm64", "native", "libchacha20.dylib");
-
-                throw new PlatformNotSupportedException();
+                else
+                    return Path.Combine("runtimes", "osx-x64", "native", "libchacha20.dylib");
             }
 
             throw new PlatformNotSupportedException("Unsupported platform");
