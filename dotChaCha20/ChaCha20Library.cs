@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace nebulae.dotChaCha20
 {
@@ -11,6 +12,16 @@ namespace nebulae.dotChaCha20
             if (_isLoaded)
                 return;
 
+            NativeLibrary.SetDllImportResolver(typeof(ChaCha20Library).Assembly, Resolve);
+
+            _isLoaded = true;
+        }
+
+        private static IntPtr Resolve(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
+        {
+            if (libraryName != "chacha20")
+                return IntPtr.Zero;
+
             var libName = GetPlatformLibraryName();
             var assemblyDir = Path.GetDirectoryName(typeof(ChaCha20Library).Assembly.Location)!;
             var fullPath = Path.Combine(assemblyDir, libName);
@@ -18,8 +29,7 @@ namespace nebulae.dotChaCha20
             if (!File.Exists(fullPath))
                 throw new DllNotFoundException($"Could not find native ChaCha20 library at {fullPath}");
 
-            NativeLibrary.Load(fullPath);
-            _isLoaded = true;
+            return NativeLibrary.Load(fullPath);
         }
 
         private static string GetPlatformLibraryName()
