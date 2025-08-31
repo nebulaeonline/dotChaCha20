@@ -7,7 +7,7 @@ namespace nebulae.dotChaCha20Tests
         [Fact]
         public void Encrypt_KnownVector_Rfc8439()
         {
-            ChaCha20.Init();
+            //ChaCha20.Init();
 
             byte[] key = Convert.FromHexString(
                 "000102030405060708090A0B0C0D0E0F" +
@@ -35,7 +35,7 @@ namespace nebulae.dotChaCha20Tests
         [Fact]
         public void EncryptDecrypt_RoundTrip_ByteArray()
         {
-            ChaCha20.Init();
+            //ChaCha20.Init();
 
             var key = new byte[32];
             var nonce = new byte[12];
@@ -57,7 +57,7 @@ namespace nebulae.dotChaCha20Tests
         [Fact]
         public void EncryptDecrypt_RoundTrip_SpanBased()
         {
-            ChaCha20.Init();
+            //ChaCha20.Init();
 
             Span<byte> key = stackalloc byte[32];
             Span<byte> nonce = stackalloc byte[12];

@@ -8,6 +8,11 @@ namespace nebulae.dotChaCha20
 {
     public static class ChaCha20
     {
+        static ChaCha20()
+        {
+            Init();
+        }
+
         /// <summary>
         /// Initializes the ChaCha20 cryptographic library.
         /// </summary>

@@ -41,8 +41,8 @@ public class Example
 {
     public static void Main()
     {
-        // Be sure to call Init() to load the native library
-        ChaCha20.Init();
+        // Be sure to call Init() to load the native library (no longer required as of v0.1.10)
+        // ChaCha20.Init();
 
         // ------------------------
         //  Example 1: byte[] API
