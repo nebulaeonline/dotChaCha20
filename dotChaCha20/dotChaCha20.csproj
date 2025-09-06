@@ -4,11 +4,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
       <PackageId>nebulae.dotChaCha20</PackageId>
-      <Version>0.1.10</Version>
+      <Version>0.2.0</Version>
       <Authors>Robert C. Horvath III</Authors>
       <Company>Nebulae Foundation LLC</Company>
-      <Description>High-performance ChaCha20 wrapper for .NET with native AVX2-optimized bindings.</Description>
-      <PackageTags>chacha chacha20 hashing crypto native AOT encryption</PackageTags>
+      <Description>High-performance ChaCha20 wrapper for .NET with native AVX2-optimized bindings with ChaCha20-based rng.</Description>
+      <PackageTags>chacha chacha20 hashing crypto native AOT encryption decryption random rng csprng</PackageTags>
       <RepositoryUrl>https://github.com/nebulaeonline/dotChaCha20</RepositoryUrl>
       <RepositoryType>git</RepositoryType>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -17,6 +17,8 @@
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
       <Copyright>Copyright © 2025 Nebulae Foundation LLC </Copyright>
       <PackageReadmeFile>docs\README.md</PackageReadmeFile>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
+      <NoWarn>1591</NoWarn>
     <Nullable>enable</Nullable>
     <RootNamespace>nebulae.dotChaCha20</RootNamespace>
     <PackageId>nebulae.$(AssemblyName)</PackageId>

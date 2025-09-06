@@ -6,6 +6,14 @@ using System.Threading.Tasks;
 
 namespace nebulae.dotChaCha20
 {
+    /// <summary>
+    /// Provides methods for encrypting data using the ChaCha20 encryption algorithm.
+    /// </summary>
+    /// <remarks>The <see cref="ChaCha20"/> class implements the ChaCha20 stream cipher, which is designed for
+    /// high performance and security. It supports encryption of data using a 32-byte key and an 8-byte or 12-byte
+    /// nonce. The class provides both span-based and array-based overloads for encryption, allowing efficient
+    /// processing of data in memory. Before using any encryption methods, the <see cref="Init"/> method must be called
+    /// to initialize the library.</remarks>
     public static class ChaCha20
     {
         static ChaCha20()
