@@ -94,7 +94,7 @@ using nebulae.dotChaCha20;
 byte[] key = new byte[32];    // 256-bit key
 byte[] nonce = new byte[12];  // 96-bit nonce
 
-// Fill with secure random values (example only — do this securely!)
+// Fill with secure random values (example only -- do this securely!)
 RandomNumberGenerator.Fill(key);
 RandomNumberGenerator.Fill(nonce);
 
