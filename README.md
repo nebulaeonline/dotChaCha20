@@ -6,7 +6,7 @@ This library provides access to the ChaCha20 stream cipher, which is known for i
 
 The underlying optimized implementation is taken verbatim from BoringSSL maintained by Google, ensuring that it is both efficient and secure.
 
-Also included is a chacha20 cryptographically secure prng following the guidelines from RFC 8439.
+Also included is a chacha20-based cryptographically secure prng.
 
 Tests are included and available in the Github repo.
 
