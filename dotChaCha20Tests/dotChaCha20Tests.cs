@@ -1,5 +1,6 @@
 using nebulae.dotChaCha20;
 using nebulae.dotChaCha20.Rng;
+using System.Collections.Concurrent;
 
 namespace nebulae.dotChaCha20Tests
 {
@@ -78,6 +79,30 @@ namespace nebulae.dotChaCha20Tests
         }
 
         [Fact]
+        public void Encrypt_RejectsEightByteNonce()
+        {
+            Assert.Throws<ArgumentException>(() =>
+                ChaCha20.Encrypt(new byte[32], new byte[8], 0, new byte[1], new byte[1]));
+        }
+
+        [Fact]
+        public void Encrypt_RejectsCounterExhaustion()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                ChaCha20.Encrypt(new byte[32], new byte[12], uint.MaxValue, new byte[65], new byte[65]));
+        }
+
+        [Fact]
+        public void StreamCipher_RejectsUseAfterCounterExhaustion()
+        {
+            var cipher = new ChaCha20StreamCipher(new byte[32], new byte[12], uint.MaxValue);
+            cipher.Transform(new byte[64], new byte[64]);
+
+            Assert.Throws<InvalidOperationException>(() =>
+                cipher.Transform(new byte[1], new byte[1]));
+        }
+
+        [Fact]
         public void ChaCha20Rng_DeterministicOutput_FromSeed()
         {
             byte[] seed = new byte[44];
@@ -105,6 +130,37 @@ namespace nebulae.dotChaCha20Tests
             {
                 Assert.Equal(rng1.NextRaw64(), rng2.NextRaw64());
             }
+        }
+
+        [Fact]
+        public void ChaCha20Rng_Clone_PreservesBankedState()
+        {
+            byte[] seed = Enumerable.Range(0, 44).Select(i => (byte)i).ToArray();
+            var rng1 = new ChaCha20Rng(seed);
+            _ = rng1.Rand32();
+            _ = rng1.Rand16();
+            _ = rng1.Rand8();
+
+            var rng2 = (ChaCha20Rng)rng1.Clone();
+
+            for (int i = 0; i < 100; i++)
+            {
+                Assert.Equal(rng1.Rand32(1000), rng2.Rand32(1000));
+                Assert.Equal(rng1.Rand16(1000), rng2.Rand16(1000));
+                Assert.Equal(rng1.Rand8(100), rng2.Rand8(100));
+            }
+        }
+
+        [Fact]
+        public void ChaCha20Rng_ConcurrentRawReadsRemainConsistent()
+        {
+            var rng = new ChaCha20Rng(Enumerable.Range(0, 44).Select(i => (byte)i).ToArray());
+            var values = new ConcurrentBag<ulong>();
+
+            Parallel.For(0, 1000, _ => values.Add(rng.NextRaw64()));
+
+            Assert.Equal(1000, values.Count);
+            Assert.Equal(1000, values.Distinct().Count());
         }
 
         [Fact]

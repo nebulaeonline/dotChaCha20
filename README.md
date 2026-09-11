@@ -32,7 +32,7 @@ Tests are included and available in the Github repo.
 
 ## Usage
 
-For those that are unaware, ChaCha20 is a stream ciper that is used for encrypting data in a way that is both fast and secure. It operates on 64-byte blocks and uses a 256-bit key. The encrypt function called with the key & nonce will encrypt the plaintext (the message), and re-running the encrypt function with the same key & nonce on the encrypted message will yield the original plaintext.
+ChaCha20 is a stream cipher that operates on 64-byte blocks with a 256-bit key and 12-byte nonce. The raw `ChaCha20.Encrypt` API provides confidentiality only and does not authenticate ciphertext.
 
 ```csharp
 

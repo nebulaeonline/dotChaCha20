@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Cryptography;
 
 namespace nebulae.dotChaCha20
 {
@@ -10,7 +6,7 @@ namespace nebulae.dotChaCha20
     /// Provides methods for encrypting data using the ChaCha20 encryption algorithm.
     /// </summary>
     /// <remarks>The <see cref="ChaCha20"/> class implements the ChaCha20 stream cipher, which is designed for
-    /// high performance and security. It supports encryption of data using a 32-byte key and an 8-byte or 12-byte
+    /// high performance and security. It supports encryption of data using a 32-byte key and a 12-byte
     /// nonce. The class provides both span-based and array-based overloads for encryption, allowing efficient
     /// processing of data in memory. Before using any encryption methods, the <see cref="Init"/> method must be called
     /// to initialize the library.</remarks>
@@ -38,13 +34,13 @@ namespace nebulae.dotChaCha20
         /// cipher designed for high performance and security. The caller must ensure that the key, nonce, and
         /// input/output buffers meet the required constraints.</remarks>
         /// <param name="key">A 32-byte key used for encryption. The key must be exactly 32 bytes long.</param>
-        /// <param name="nonce">A nonce used for encryption. The nonce must be either 8 or 12 bytes long.</param>
+        /// <param name="nonce">A 12-byte nonce used for encryption. The nonce must never be reused with the same key.</param>
         /// <param name="counter">The initial counter value for the ChaCha20 algorithm. This value is typically set to 0 for new encryption
         /// operations.</param>
         /// <param name="input">The input data to be encrypted. The length of the input must match the length of the output buffer.</param>
         /// <param name="output">A buffer to store the encrypted output data. The length of the output buffer must match the length of the
         /// input data.</param>
-        /// <exception cref="ArgumentException">Thrown if the <paramref name="key"/> is not 32 bytes long, if the <paramref name="nonce"/> is not 8 or 12
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="key"/> is not 32 bytes long, if the <paramref name="nonce"/> is not 12
         /// bytes long, or if the lengths of <paramref name="input"/> and <paramref name="output"/> do not match.</exception>
         /// <exception cref="InvalidOperationException">Thrown if the underlying encryption operation fails.</exception>
         public static void Encrypt(
@@ -56,10 +52,12 @@ namespace nebulae.dotChaCha20
         {
             if (key.Length != 32)
                 throw new ArgumentException("ChaCha20 key must be 32 bytes.");
-            if (nonce.Length != 8 && nonce.Length != 12)
-                throw new ArgumentException("ChaCha20 nonce must be 8 or 12 bytes.");
+            if (nonce.Length != 12)
+                throw new ArgumentException("ChaCha20 nonce must be 12 bytes.");
             if (input.Length != output.Length)
                 throw new ArgumentException("Input and output lengths must match.");
+
+            ValidateCounterRange(counter, input.Length);
 
             unsafe
             {
@@ -84,7 +82,7 @@ namespace nebulae.dotChaCha20
         /// cipher designed for high performance and security. The caller must ensure that the input and output buffers
         /// are of the same length, as the encrypted data is written directly to the output buffer.</remarks>
         /// <param name="key">The encryption key, which must be a 32-byte array. This key is used to initialize the ChaCha20 cipher.</param>
-        /// <param name="nonce">The nonce, which must be either an 8-byte or 12-byte array. The nonce ensures that the encryption is unique
+        /// <param name="nonce">The 12-byte nonce. The nonce ensures that the encryption is unique
         /// for each operation.</param>
         /// <param name="counter">The initial counter value for the ChaCha20 algorithm. This value is typically set to 0 for most use cases.</param>
         /// <param name="input">The input data to be encrypted. This array contains the plaintext data that will be transformed into
@@ -93,7 +91,7 @@ namespace nebulae.dotChaCha20
         /// array.</param>
         /// <exception cref="ArgumentNullException">Thrown if any of the arguments <paramref name="key"/>, <paramref name="nonce"/>, <paramref name="input"/>,
         /// or <paramref name="output"/> are null.</exception>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="key"/> is not 32 bytes, <paramref name="nonce"/> is not 8 or 12 bytes, or if
+        /// <exception cref="ArgumentException">Thrown if <paramref name="key"/> is not 32 bytes, <paramref name="nonce"/> is not 12 bytes, or if
         /// <paramref name="input"/> and <paramref name="output"/> have different lengths.</exception>
         /// <exception cref="InvalidOperationException">Thrown if the underlying ChaCha20 encryption operation fails.</exception>
         public static void Encrypt(
@@ -108,10 +106,12 @@ namespace nebulae.dotChaCha20
 
             if (key.Length != 32)
                 throw new ArgumentException("ChaCha20 key must be 32 bytes.");
-            if (nonce.Length != 8 && nonce.Length != 12)
-                throw new ArgumentException("Nonce must be 8 or 12 bytes.");
+            if (nonce.Length != 12)
+                throw new ArgumentException("Nonce must be 12 bytes.");
             if (input.Length != output.Length)
                 throw new ArgumentException("Input and output lengths must match.");
+
+            ValidateCounterRange(counter, input.Length);
 
             int result = ChaCha20Interop.chacha20_encrypt(
                 key, nonce, counter, input, output, (UIntPtr)input.Length);
@@ -119,5 +119,28 @@ namespace nebulae.dotChaCha20
             if (result != 0)
                 throw new InvalidOperationException($"chacha20_encrypt returned error code {result}");
         }
+
+        /// <summary>
+        /// Generates a cryptographically secure 12-byte nonce suitable for use in authentication or encryption
+        /// operations.
+        /// </summary>
+        /// <remarks>This method uses a secure random number generator to ensure the nonce is
+        /// unpredictable and appropriate for cryptographic purposes.</remarks>
+        /// <returns>A byte array containing the generated 12-byte nonce.</returns>
+        public static byte[] GenerateNonce12()
+        {
+            byte[] nonce = new byte[12];
+            RandomNumberGenerator.Fill(nonce);
+            return nonce;
+        }
+
+        private static void ValidateCounterRange(uint counter, int length)
+        {
+            ulong blocks = ((ulong)length + 63) / 64;
+            ulong remainingBlocks = (ulong)uint.MaxValue - counter + 1;
+            if (blocks > remainingBlocks)
+                throw new ArgumentOutOfRangeException(nameof(length), "The requested data exceeds the ChaCha20 counter range.");
+        }
+
     }
 }

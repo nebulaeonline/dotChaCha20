@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 
 namespace nebulae.dotChaCha20
 {
@@ -21,6 +22,11 @@ namespace nebulae.dotChaCha20
         {
             if (libraryName != "chacha20")
                 return IntPtr.Zero;
+
+            bool isMacArm64 = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
+            if (!isMacArm64 && (RuntimeInformation.ProcessArchitecture != Architecture.X64 || !Avx2.IsSupported))
+                throw new PlatformNotSupportedException("The native ChaCha20 library requires a supported x64 AVX2 or macOS ARM64 runtime.");
 
             var libName = GetPlatformLibraryName();
             var assemblyDir = Path.GetDirectoryName(typeof(ChaCha20Library).Assembly.Location)!;

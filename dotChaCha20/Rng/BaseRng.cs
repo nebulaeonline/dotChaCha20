@@ -14,6 +14,7 @@ public abstract class BaseRng : INebulaeRng
 
     public const double MINZERO_DEFAULT = 1.0 / (1UL << 53);
 
+    protected readonly object SyncRoot = new();
     protected ConcurrentStack<uint> _banked32 = new ConcurrentStack<uint>();
     protected ConcurrentStack<ushort> _banked16 = new ConcurrentStack<ushort>();
     protected ConcurrentStack<byte> _banked8 = new ConcurrentStack<byte>();
@@ -92,10 +93,19 @@ public abstract class BaseRng : INebulaeRng
     /// <returns>ulong</returns>
     public ulong Rand64(ulong Max = 0)
     {
-        if (Max == ulong.MaxValue) Max = 0;
+        lock (SyncRoot)
+        {
+            if (Max == ulong.MaxValue) Max = 0;
 
-        ulong ul = NextRaw64();
-        return (Max == 0) ? ul : ul % ++Max;
+            ulong raw = NextRaw64();
+            if (Max == 0) return raw;
+
+            ulong range = Max + 1;
+            ulong threshold = unchecked(0UL - range) % range;
+            while (raw < threshold)
+                raw = NextRaw64();
+            return raw % range;
+        }
     }
 
     /// <summary>
@@ -124,10 +134,10 @@ public abstract class BaseRng : INebulaeRng
         ulong range = Max - Min + 1;
         if (range == 0) return Rand64();
 
-        ulong threshold = ulong.MaxValue - (ulong.MaxValue % range);
+        ulong threshold = unchecked(0UL - range) % range;
 
         ulong r;
-        do { r = Rand64(); } while (r >= threshold);
+        do { r = Rand64(); } while (r < threshold);
 
         return Min + (r % range);
     }
@@ -146,10 +156,10 @@ public abstract class BaseRng : INebulaeRng
         ulong range = (ulong)((ulong)Max - (ulong)Min) + 1;
         if (range == 0) return (long)Rand64();
 
-        ulong threshold = ulong.MaxValue - (ulong.MaxValue % range);
+        ulong threshold = unchecked(0UL - range) % range;
 
         ulong r;
-        do { r = Rand64(); } while (r >= threshold);
+        do { r = Rand64(); } while (r < threshold);
 
         return Min + (long)(r % range);
     }
@@ -161,17 +171,29 @@ public abstract class BaseRng : INebulaeRng
     /// <returns>uint</returns>
     public uint Rand32(uint Max = 0)
     {
-        if (Max == uint.MaxValue) Max = 0;
+        lock (SyncRoot)
+        {
+            if (Max == uint.MaxValue) Max = 0;
 
-        if (_banked32.TryPop(out uint ui))
-            return (Max == 0) ? ui : ui % ++Max;
+            uint raw = NextRaw32();
+            if (Max == 0) return raw;
 
-        ulong ul = NextRaw64();
-        uint lo = (uint)(ul & 0xFFFFFFFF);
-        _banked32.Push(lo);
+            uint range = (uint)Max + 1;
+            uint threshold = unchecked(0U - range) % range;
+            while (raw < threshold)
+                raw = NextRaw32();
+            return raw % range;
+        }
+    }
 
-        return (Max == 0) ? (uint)(ul >> 32) : (uint)(ul >> 32) % ++Max;
- 
+    private uint NextRaw32()
+    {
+        if (_banked32.TryPop(out uint value))
+            return value;
+
+        ulong raw = NextRaw64();
+        _banked32.Push((uint)raw);
+        return (uint)(raw >> 32);
     }
 
     /// <summary>
@@ -237,22 +259,33 @@ public abstract class BaseRng : INebulaeRng
     /// <returns>ushort</returns>
     public ushort Rand16(ushort Max = 0)
     {
-        if (Max == ushort.MaxValue) Max = 0;
+        lock (SyncRoot)
+        {
+            if (Max == ushort.MaxValue) Max = 0;
 
-        if (_banked16.TryPop(out ushort us))
-            return (Max == 0) ? us : (ushort)(us % ++Max);
+            ushort raw = NextRaw16();
+            if (Max == 0) return raw;
 
-        var r64 = NextRaw64();
+            uint range = (uint)Max + 1;
+            uint threshold = unchecked(0U - range) % range;
+            while (raw < threshold)
+                raw = NextRaw16();
+            return (ushort)(raw % range);
+        }
+    }
 
+    private ushort NextRaw16()
+    {
+        if (_banked16.TryPop(out ushort value))
+            return value;
+
+        ulong raw = NextRaw64();
         // Push lower bits first (0–15), then (16–31), then (32–47)
-        _banked16.Push((ushort)((r64 >> 0) & 0xFFFF));   // bits 0–15
-        _banked16.Push((ushort)((r64 >> 16) & 0xFFFF));  // bits 16–31
-        _banked16.Push((ushort)((r64 >> 32) & 0xFFFF));  // bits 32–47
+        _banked16.Push((ushort)((raw >> 0) & 0xFFFF));
+        _banked16.Push((ushort)((raw >> 16) & 0xFFFF));
+        _banked16.Push((ushort)((raw >> 32) & 0xFFFF));
 
-        // Now take bits 48–63 immediately
-        ushort us2 = (ushort)((r64 >> 48) & 0xFFFF);
-
-        return (Max == 0) ? us2 : (ushort)((uint)us2 % ++Max);
+        return (ushort)((raw >> 48) & 0xFFFF);
     }
 
     /// <summary>
@@ -281,10 +314,10 @@ public abstract class BaseRng : INebulaeRng
         uint range = (uint)(Max - Min) + 1;
         if (range == 0) return Rand16();
 
-        uint threshold = (1U << 16) - ((1U << 16) % range);
+        uint threshold = unchecked(0U - range) % range;
 
         uint r;
-        do { r = Rand16(); } while (r >= threshold);
+        do { r = Rand16(); } while (r < threshold);
 
         return (ushort)(Min + (r % range));
     }
@@ -303,10 +336,10 @@ public abstract class BaseRng : INebulaeRng
         uint range = (uint)(Max - Min) + 1;
         if (range == 0) return (short)Rand16();
 
-        uint threshold = (1U << 16) - ((1U << 16) % range);
+        uint threshold = unchecked(0U - range) % range;
 
         uint r;
-        do { r = Rand16(); } while (r >= threshold);
+        do { r = Rand16(); } while (r < threshold);
 
         return (short)(Min + (r % range));
     }
@@ -318,23 +351,32 @@ public abstract class BaseRng : INebulaeRng
     /// <returns>byte</returns>
     public byte Rand8(byte Max = 0)
     {
-        if (Max == byte.MaxValue) Max = 0;
+        lock (SyncRoot)
+        {
+            if (Max == byte.MaxValue) Max = 0;
 
-        if (_banked8.TryPop(out byte ub))
-            return (Max == 0) ? ub : (byte)(ub % ++Max);
+            byte raw = NextRaw8();
+            if (Max == 0) return raw;
 
-        var r64 = NextRaw64();
+            int range = Max + 1;
+            int threshold = (256 - range) % range;
+            while (raw < threshold)
+                raw = NextRaw8();
+            return (byte)(raw % range);
+        }
+    }
 
+    private byte NextRaw8()
+    {
+        if (_banked8.TryPop(out byte value))
+            return value;
+
+        ulong raw = NextRaw64();
         // Push lower bytes first (0–7, 8–15, ..., 48–55)
         for (int i = 0; i < 7; i++)
-        {
-            _banked8.Push((byte)((r64 >> (i * 8)) & 0xFF));
-        }
+            _banked8.Push((byte)((raw >> (i * 8)) & 0xFF));
 
-        // Now take highest 8 bits (56–63) immediately
-        byte ub2 = (byte)((r64 >> 56) & 0xFF);
-
-        return (Max == 0) ? ub2 : (byte)((uint)ub2 % ++Max);
+        return (byte)((raw >> 56) & 0xFF);
     }
 
     /// <summary>
@@ -366,10 +408,10 @@ public abstract class BaseRng : INebulaeRng
         int range = Max - Min + 1;
         if (range <= 0 || range > 256) return Rand8();  // fallback for full range
 
-        int threshold = 256 - (256 % range);
+        int threshold = (256 - range) % range;
 
         byte r;
-        do { r = Rand8(); } while (r >= threshold);
+        do { r = Rand8(); } while (r < threshold);
 
         return (byte)(Min + (r % range));
     }
@@ -391,10 +433,10 @@ public abstract class BaseRng : INebulaeRng
         int range = Max - Min + 1;
         if (range <= 0 || range > 256) return (sbyte)Rand8();
 
-        int threshold = 256 - (256 % range);
+        int threshold = (256 - range) % range;
 
         byte r;
-        do { r = Rand8(); } while (r >= threshold);
+        do { r = Rand8(); } while (r < threshold);
 
         return (sbyte)(Min + (r % range));
     }
