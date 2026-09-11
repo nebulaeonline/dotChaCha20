@@ -15,7 +15,7 @@
       <PackageProjectUrl>https://github.com/nebulaeonline/dotChaCha20</PackageProjectUrl>
       <IncludeSymbols>false</IncludeSymbols>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <Copyright>Copyright © 2025 Nebulae Foundation LLC </Copyright>
+      <Copyright>Copyright © 2025-2026 Nebulae Foundation LLC </Copyright>
       <PackageReadmeFile>docs\README.md</PackageReadmeFile>
       <GenerateDocumentationFile>true</GenerateDocumentationFile>
       <NoWarn>1591</NoWarn>
