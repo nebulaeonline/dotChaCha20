@@ -23,10 +23,17 @@ namespace nebulae.dotChaCha20
             if (libraryName != "chacha20")
                 return IntPtr.Zero;
 
-            bool isMacArm64 = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
-                && RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
-            if (!isMacArm64 && (RuntimeInformation.ProcessArchitecture != Architecture.X64 || !Avx2.IsSupported))
-                throw new PlatformNotSupportedException("The native ChaCha20 library requires a supported x64 AVX2 or macOS ARM64 runtime.");
+            var architecture = RuntimeInformation.ProcessArchitecture;
+            if (architecture == Architecture.X64)
+            {
+                if (!Avx2.IsSupported)
+                    throw new PlatformNotSupportedException("The native ChaCha20 library requires AVX2 on x64.");
+            }
+            else if (architecture != Architecture.Arm64)
+            {
+                throw new PlatformNotSupportedException(
+                    $"The native ChaCha20 library does not support {architecture}.");
+            }
 
             var libName = GetPlatformLibraryName();
             var assemblyDir = Path.GetDirectoryName(typeof(ChaCha20Library).Assembly.Location)!;
@@ -41,10 +48,20 @@ namespace nebulae.dotChaCha20
         private static string GetPlatformLibraryName()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return Path.Combine("runtimes", "win-x64", "native", "chacha20.dll");
+            {
+                var rid = RuntimeInformation.ProcessArchitecture == Architecture.Arm64
+                    ? "win-arm64"
+                    : "win-x64";
+                return Path.Combine("runtimes", rid, "native", "chacha20.dll");
+            }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                return Path.Combine("runtimes", "linux-x64", "native", "libchacha20.so");
+            {
+                var rid = RuntimeInformation.ProcessArchitecture == Architecture.Arm64
+                    ? "linux-arm64"
+                    : "linux-x64";
+                return Path.Combine("runtimes", rid, "native", "libchacha20.so");
+            }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
