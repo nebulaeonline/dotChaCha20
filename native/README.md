@@ -17,6 +17,31 @@ Build natively on the target OS and architecture. Install prerequisites:
 - Clang's assembler for Windows ARM64, as required by BoringSSL's ARM64
   assembly.
 
+For Windows x64, use Visual Studio 2022 with the x64 C++ build tools and
+Windows SDK, plus NASM:
+
+```text
+cmake -S current/native -B build/win-x64 -G "Visual Studio 17 2022" -A x64 -DDOTCHACHA_ARCH=x64 -DCMAKE_ASM_NASM_COMPILER=nasm
+cmake --build build/win-x64 --config Release
+cmake --install build/win-x64 --config Release --prefix current/dotChaCha20/runtimes/win-x64
+```
+
+For Linux x64, run on a Linux x64 host with NASM installed:
+
+```text
+cmake -S current/native -B build/linux-x64 -DCMAKE_BUILD_TYPE=Release -DDOTCHACHA_ARCH=x64
+cmake --build build/linux-x64
+cmake --install build/linux-x64 --prefix current/dotChaCha20/runtimes/linux-x64
+```
+
+For macOS x64, run on an Intel Mac with NASM installed:
+
+```text
+cmake -S current/native -B build/osx-x64 -DCMAKE_BUILD_TYPE=Release -DDOTCHACHA_ARCH=x64
+cmake --build build/osx-x64
+cmake --install build/osx-x64 --prefix current/dotChaCha20/runtimes/osx-x64
+```
+
 For Linux ARM64, run on a Linux ARM64 host:
 
 ```text
@@ -38,10 +63,6 @@ cmake --install build/win-arm64 --config Release --prefix current/dotChaCha20/ru
 The Visual Studio generator does not compile generic `.S` sources directly, so
 the CMake target invokes Clang to assemble BoringSSL's ARM64 source into a
 Windows COFF object before linking the DLL.
-
-For the existing x64 targets, set `DOTCHACHA_ARCH=x64`. On Windows x64, also
-install NASM and select the Visual Studio architecture with `-A x64`; Linux
-and macOS use their native C/C++ toolchain.
 
 Install to the matching runtime folder for each native build:
 
