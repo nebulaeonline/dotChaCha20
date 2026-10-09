@@ -36,10 +36,12 @@ cmake --install build/linux-x64 --prefix current/dotChaCha20/runtimes/linux-x64
 
 For macOS x64, run on either an Intel or Apple Silicon Mac with Xcode
 Command Line Tools and NASM installed. Set `CMAKE_OSX_ARCHITECTURES` to
-`x86_64` to cross-compile the x64 binary from an Apple Silicon host:
+`x86_64` to cross-compile the x64 binary from an Apple Silicon host. Set
+`CMAKE_OSX_DEPLOYMENT_TARGET` to the minimum macOS version the library should
+support; this example targets macOS 11.0 and later:
 
 ```text
-cmake -S current/native -B build/osx-x64 -DCMAKE_BUILD_TYPE=Release -DDOTCHACHA_ARCH=x64 -DCMAKE_OSX_ARCHITECTURES=x86_64
+cmake -S current/native -B build/osx-x64 -DCMAKE_BUILD_TYPE=Release -DDOTCHACHA_ARCH=x64 -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
 cmake --build build/osx-x64
 cmake --install build/osx-x64 --prefix current/dotChaCha20/runtimes/osx-x64
 ```
