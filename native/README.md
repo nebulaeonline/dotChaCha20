@@ -2,13 +2,16 @@
 
 The native library is deliberately built from only two source files:
 
-- `boringssl-rob/crypto/chacha/chacha20_export.cc`, which exports the .NET
+- `chacha20_export.cc`, the project-owned shim that exports the .NET
   `chacha20_encrypt` entry point.
 - One generated BoringSSL ChaCha assembly file for the target OS and CPU.
 
 This does not build or link the rest of BoringSSL. The generated assembly is
 already checked in under `boringssl-rob/gen/crypto`; if it needs regeneration,
 follow the pre-generated-file instructions in `boringssl-rob/BUILDING.md`.
+The build commands below assume the BoringSSL checkout is in the sibling
+`boringssl-rob` directory. To use a clone at a different location, add
+`-DBORINGSSL_SOURCE_DIR=/path/to/boringssl` to each `cmake -S` configure command.
 
 Build natively on the target OS and architecture. Install prerequisites:
 

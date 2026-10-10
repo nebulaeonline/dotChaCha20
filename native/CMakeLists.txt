@@ -92,7 +92,7 @@ else()
 endif()
 
 add_library(chacha20 SHARED
-    "${BORINGSSL_SOURCE_DIR}/crypto/chacha/chacha20_export.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/chacha20_export.cc"
     "${_chacha_source}")
 target_compile_features(chacha20 PRIVATE cxx_std_11)
 target_compile_definitions(chacha20 PRIVATE "${_chacha_compile_definition}")
